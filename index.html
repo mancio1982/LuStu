@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lu stu - Gioco di Carte</title>
+  <link rel="icon" href="immagini/favicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Landing page: ora due tasti affiancati -->
+  <div id="landing">
+    <div id="landing-buttons">
+      <button class="button" onclick="startVsCpuWithMusic()">Giocatore Singolo</button>
+      <a href="multiplayer.html" class="button">Multiplayer</a>
+    </div>
+    <div id="regolamento">
+      <a href="https://www.lu-stu.it/wp-content/uploads/2021/08/STU-regolamento-2019-web.pdf" target="_blank">Regolamento</a>
+    </div>
+  </div>
+
+  <!-- Lobby per modalità multiplayer -->
+  <div id="lobby" style="display:none;">
+    <h2>Lobby Multiplayer</h2>
+    <div id="lobby-form">
+      <label for="lobbyName">Inserisci il tuo nome:</label>
+      <input type="text" id="lobbyName" placeholder="Il tuo nome">
+      <button class="button" onclick="joinLobby()">Partecipa</button>
+    </div>
+    <div id="lobby-info" style="display:none;">
+      <p>In attesa degli altri giocatori...</p>
+      <div id="lobby-players"></div>
+      <p>Condividi questo link con i tuoi amici: <span id="lobby-link"></span></p>
+      <div id="lobby-controls">
+        <button class="button" onclick="startMultiplayerGame()">Inizia Partita</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gioco vero e proprio -->
+  <div id="game" style="display:none;">
+    <div id="container">
+      <div id="table">
+        <div id="messages"></div>
+      </div>
+      <div id="controls"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <audio id="bg-music" src="audio/soundtrack.mp3"></audio>
+  <script>
+    var audio = document.getElementById("bg-music");
+    audio.volume = 0.15;
+    var playlist = ["audio/soundtrack.mp3", "audio/soundtrack2.mp3", "audio/soundtrack3.mp3"];
+    var currentTrackIndex = 0;
+    audio.addEventListener("ended", function() {
+      currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+      audio.src = playlist[currentTrackIndex];
+      audio.play().catch(function(error) {
+        console.error("Riproduzione musica di sottofondo bloccata:", error);
+      });
+    });
+
+    // Function to start CPU game AND music
+    function startVsCpuWithMusic() {
+      // Attempt to play music first
+      audio.play().catch(function(error) {
+        console.error("Riproduzione musica di sottofondo bloccata:", error);
+      });
+      // Then call the original startVsCpu function (defined in script.js)
+      if (typeof startVsCpu === 'function') {
+        startVsCpu();
+      } else {
+        console.error('startVsCpu function not found in script.js');
+      }
+    }
+  </script>
+</body>
+</html>

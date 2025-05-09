@@ -1,0 +1,284 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+  body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #001d06
+  }
+  /* Landing page: copre tutta la viewport con l'immagine di sfondo */
+  #landing {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url("immagini/inizio.jpg") no-repeat center center;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  }
+
+  /* Stile per i pulsanti nella landing page */
+  #landing-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  margin-top: 10.5vh; /* Sposta i tasti a 10vh dal top */
+  background: transparent; /* Assicurati che il contenitore non abbia un background */
+}
+
+/* Pulsanti all'interno del contenitore: annulla le regole di posizione assoluta */
+#landing-buttons .button {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  /* Imposta lo stile originale; se preferisci usare il background pieno, rimuovi il background: transparent */
+  background-color: #9fc640 !important;
+  border: none !important;
+  color: #000000 !important;
+  /* Se vuoi mantenere l'ombra originale: */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+  padding: 13px 16px;
+}
+
+
+
+
+
+
+/* L'immagine di sfondo ora è un elemento picture/img */
+#landing-img {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+object-fit: cover; /* Copre tutta l'area senza deformazioni */
+z-index: -1; /* Mettiamo l'immagine dietro gli altri contenuti */
+}
+
+  /* Sezione Regolamento */
+
+  #regolamento {
+  position: absolute;
+  bottom: 9%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 1em;
+}
+
+#regolamento a {
+  color: #9fc640;
+  text-decoration: none;
+}
+#regolamento a:hover {
+  text-decoration: underline;
+}
+
+/* Stile per la lobby */
+#lobby {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #001d06;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  align-items: center;
+}
+#lobby-form, #lobby-info {
+  text-align: center;
+  margin: 10px;
+  /* margin-top: 0; */ /* Imposta questo valore in base alle tue esigenze; ad esempio, 0 o un valore in vh */
+
+}
+#lobby-players p {
+  margin: 5px 0;
+}
+
+  /* Controlli posizionati subito sotto la sezione regolamento */
+  #controls {
+    text-align: center;
+    margin-top: 20px;
+  }
+  /* Stile per tutti i pulsanti */
+  .button {
+    appearance: button;
+    background-color: #9fc640;
+    border: solid transparent;
+    border-radius: 16px;
+    border-width: 0 0 4px;
+    box-sizing: border-box;
+    color: #000000; /* Testo nero */
+    cursor: pointer;
+    display: inline-block;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    line-height: 20px;
+    margin: 0;
+    outline: none;
+    overflow: visible;
+    padding: 13px 16px;
+    text-align: center;
+    text-transform: uppercase;
+    touch-action: manipulation;
+    transform: translateZ(0);
+    transition: filter 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
+    vertical-align: middle;
+    white-space: nowrap;
+    position: relative;
+  }
+  .button:after {
+    background-clip: padding-box;
+    background-color: #C7D530;
+    border: solid transparent;
+    border-radius: 16px;
+    border-width: 0 0 4px;
+    bottom: -4px;
+    content: "";
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: -1;
+  }
+  .button,
+  .button:focus {
+    user-select: auto;
+  }
+  .button:hover:not(:disabled) {
+    filter: brightness(1.1);
+    -webkit-filter: brightness(1.1);
+  }
+  .button:disabled {
+    cursor: auto;
+  }
+  .button:active {
+    border-width: 4px 0 0;
+    background: none;
+  }
+  #landing .button {
+position: absolute;
+top: 56%;
+left: 50%;
+transform: translate(-50%, -50%);
+}
+
+  #game {
+    display: none;
+  }
+  /* Container principale: tavolo a sinistra e log a destra */
+  #container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #table {
+height: 83vh;
+width: calc(83vh * 0.6);
+background-image: url("immagini/tavoloverticale.png");
+background-size: contain;
+background-position: center;
+background-repeat: no-repeat;
+position: relative;
+margin: 0 auto;
+}
+
+  /* I giocatori sono disposti attorno al tavolo (coordinate polari) */
+  .player {
+    position: absolute;
+    text-align: center;
+    width: 100px;
+  }
+  .player .info {
+    background: rgba(255,255,255,0.8);
+    padding: 3px;
+    border: 2px solid #333;
+    border-radius: 15px;
+    margin-bottom: 5px;
+  }
+  /* Le carte */
+  .player .card {
+    border: none;
+    padding: 0;
+    background: transparent;
+    margin: 0 auto;
+    width: 60%;
+    height: auto;
+    transition: all 0.5s ease;
+  }
+  .player .card img {
+    width: 80%;  /* Immagini ridotte all'80% */
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  .dealer .info {
+    border: 2px solid gold;
+  }
+  #messages {
+position: absolute;
+top: 55%;
+left: 50%;
+transform: translateX(-50%);
+text-align: center;
+pointer-events: none;
+color: #fff;
+font-size: 16px;
+z-index: 10000;
+}
+
+#messages p {
+margin: 5px 0;
+padding: 0;
+}
+
+:root {
+--player-size: 100px; /* Dimensione dei giocatori per desktop */
+--info-font-size: 14px;
+}
+
+@media (max-width: 600px) {
+:root {
+  --player-size: 80px; /* Dimensione maggiore per dispositivi mobili */
+  --info-font-size: 12px;
+}
+}
+
+.player {
+/* Possiamo comunque impostare width/height via CSS, ma verranno anche applicate quelle in linea
+   lette da renderTable. Qui le usiamo come fallback */
+width: var(--player-size);
+height: var(--player-size);
+}
+
+.info {
+font-size: var(--info-font-size);
+/* Se necessario, aggiungi una larghezza minima o altre regole per evitare il wrapping eccessivo */
+white-space: nowrap;
+}
+
+.last-log-message {
+    font-weight: bold;
+}

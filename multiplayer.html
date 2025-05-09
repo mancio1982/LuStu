@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lu Stu - Modalità multiplayer</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Disabilita la connessione WebSocket in questa pagina
+        window.disableWebSocket = true;
+    </script>
+    <script src="script.js"></script>
+    <style>
+        .multiplayer-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .lobby-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .player-list {
+            list-style: none;
+            padding: 0;
+        }
+        .player-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .game-section {
+            display: none;
+        }
+        .start-game-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .start-game-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .lobby-options {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .lobby-option {
+            flex: 1;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        /* Assicurati che il contenuto della pagina non venga duplicato */
+        body {
+            overflow-x: hidden;
+        }
+        .lobby-id-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .copy-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #e0e0e0;
+        }
+        .copy-icon {
+            font-size: 1.2em;
+        }
+        .copy-btn.copied {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="multiplayer-container">
+        <!-- Rimossa la scritta "Lu Stu - Modalità Multiplayer" -->
+        
+        <!-- Sezione per creare o unirsi a una lobby -->
+        <div id="lobbyOptionsSection">
+            <div class="lobby-options">
+                <div class="lobby-option">
+                    <h2>Crea una nuova lobby</h2>
+                    <div id="playerName">Il tuo nome: <input type="text" id="playerNameInput"></div>
+                    <button id="createLobbyBtn" class="button">Crea Lobby</button>
+                </div>
+                
+                <div class="lobby-option">
+                    <h2>Unisciti a una lobby esistente</h2>
+                    <div id="joinPlayerName">Il tuo nome: <input type="text" id="joinPlayerNameInput"></div>
+                    <div id="existingLobbyId">ID Lobby: <input type="text" id="existingLobbyIdInput"></div>
+                    <button id="joinLobbyBtn" class="button">Unisciti alla Lobby</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sezione della lobby attiva -->
+        <div class="lobby-section hidden" id="activeLobbySection">
+            <h2>Lobby</h2>
+            <div id="lobbyId" class="lobby-id-container">
+                ID Lobby: <span id="lobbyIdDisplay"></span>
+                <button id="copyLobbyIdBtn" class="copy-btn" title="Copia ID Lobby">
+                    <span class="copy-icon">📋</span>
+                </button>
+            </div>
+            <div id="currentPlayer">Il tuo nome: <span id="currentPlayerDisplay"></span></div>
+            
+            <h3>Giocatori in Lobby:</h3>
+            <ul id="playerList" class="player-list"></ul>
+            
+            <button id="startGameBtn" class="start-game-btn" disabled>Inizia Partita</button>
+            <button id="leaveLobbyBtn" class="button">Esci dalla Lobby</button>
+        </div>
+        
+        <!-- Sezione del gioco -->
+        <div class="game-section" id="gameSection">
+            <!-- Il gioco verrà caricato qui -->
+            <div id="actionButtons" style="display: none;">
+                <button id="keepCardBtn" class="button" style="display: none;">Sto</button>
+                <button id="passCardBtn" class="button" style="display: none;">Passa</button>
+                <button id="nextTurnBtn" class="button" style="display: none;">Prossimo turno</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Genera un ID univoco per il giocatore
+        const playerId = Math.random().toString(36).substring(2, 10);
+        console.log('Generated player ID:', playerId);
+        
+        // Carica lo script multiplayer.js
+        const multiplayerScript = document.createElement('script');
+        multiplayerScript.src = 'multiplayer.js';
+        multiplayerScript.onload = function() {
+            console.log('Multiplayer script loaded');
+            // Inizializza il gioco multiplayer dopo che lo script è caricato
+            window.game = multiplayerGame;
+            window.game.playerId = playerId;
+            
+            // Elementi DOM
+            const createLobbyBtn = document.getElementById('createLobbyBtn');
+            const joinLobbyBtn = document.getElementById('joinLobbyBtn');
+            const startGameBtn = document.getElementById('startGameBtn');
+            const playerList = document.getElementById('playerList');
+            const gameSection = document.getElementById('gameSection');
+            const activeLobbySection = document.getElementById('activeLobbySection');
+            const lobbyIdDisplay = document.getElementById('lobbyIdDisplay');
+            const currentPlayerDisplay = document.getElementById('currentPlayerDisplay');
+            const lobbyOptionsSection = document.getElementById('lobbyOptionsSection');
+            const playerNameInput = document.getElementById('playerNameInput');
+            const joinPlayerNameInput = document.getElementById('joinPlayerNameInput');
+            const existingLobbyIdInput = document.getElementById('existingLobbyIdInput');
+
+            // Gestione del pulsante crea lobby
+            createLobbyBtn.addEventListener('click', function() {
+                const playerName = playerNameInput.value.trim();
+                if (!playerName) {
+                    alert('Inserisci un nome per il giocatore');
+                    return;
+                }
+                
+                // Genera un ID univoco per la lobby
+                const lobbyId = Math.random().toString(36).substring(2, 10);
+                console.log('Creating lobby:', lobbyId, 'with player:', playerName);
+                
+                // Unisciti alla lobby come creatore
+                window.game.joinLobby(lobbyId, playerName);
+            });
+            
+            // Gestione del pulsante unisciti a lobby
+            joinLobbyBtn.addEventListener('click', function() {
+                const playerName = joinPlayerNameInput.value.trim();
+                const lobbyId = existingLobbyIdInput.value.trim();
+                
+                if (!lobbyId || !playerName) {
+                    alert('Inserisci sia l\'ID della lobby che il nome del giocatore');
+                    return;
+                }
+                
+                console.log('Joining lobby:', lobbyId, 'with player:', playerName);
+                window.game.joinLobby(lobbyId, playerName);
+            });
+
+            // Funzione per aggiornare la lista dei giocatori
+            function updatePlayerList(players) {
+                playerList.innerHTML = '';
+                players.forEach(player => {
+                    const li = document.createElement('li');
+                    li.className = 'player-item';
+                    li.textContent = player.name;
+                    playerList.appendChild(li);
+                });
+                
+                // Abilita il pulsante "Inizia Partita" se ci sono almeno 2 giocatori
+                startGameBtn.disabled = players.length < 2;
+            }
+            
+            // Funzione per aggiornare lo stato della lobby
+            function updateLobbyState() {
+                if (!window.game || !window.game.lobbyId) {
+                    console.error('No lobby ID available');
+                    return;
+                }
+                
+                console.log('Updating lobby state for lobby:', window.game.lobbyId);
+                fetch('lobby.php?lobby=' + window.game.lobbyId)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Error updating lobby state:', data.error);
+                            return;
+                        }
+                        
+                        console.log('Lobby state updated:', data);
+                        
+                        // Aggiorna la lista dei giocatori
+                        updatePlayerList(data.players);
+                        
+                        // Se il gioco è iniziato e non era già iniziato, avvia il gioco
+                        if (data.gameStarted && !window.game.gameStarted) {
+                            console.log('Game started, initializing game...');
+                            window.game.gameStarted = true;
+                            startGame();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating lobby state:', error);
+                    });
+            }
+            
+            // Funzione per avviare il gioco
+            function startGame() {
+                console.log('Starting game...');
+                gameSection.style.display = 'block';
+                
+                // Nascondi la sezione della lobby
+                activeLobbySection.style.display = 'none';
+                
+                // Aggiorna l'UI del gioco
+                if (window.game) {
+                    window.game.updateUI();
+                }
+            }
+
+            // Aggiungi la funzionalità di copia dell'ID della lobby
+            document.getElementById('copyLobbyIdBtn').addEventListener('click', function() {
+                const lobbyId = document.getElementById('lobbyIdDisplay').textContent;
+                
+                // Crea un elemento textarea temporaneo
+                const textarea = document.createElement('textarea');
+                textarea.value = lobbyId;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                
+                // Seleziona e copia il testo
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    // Cambia temporaneamente l'icona per indicare il successo
+                    const copyBtn = this;
+                    copyBtn.classList.add('copied');
+                    copyBtn.querySelector('.copy-icon').textContent = '✓';
+                    
+                    // Ripristina l'icona originale dopo 2 secondi
+                    setTimeout(() => {
+                        copyBtn.classList.remove('copied');
+                        copyBtn.querySelector('.copy-icon').textContent = '📋';
+                    }, 2000);
+                } catch (err) {
+                    console.error('Errore durante la copia:', err);
+                    alert('Errore durante la copia dell\'ID della lobby');
+                }
+                
+                // Rimuovi l'elemento textarea temporaneo
+                document.body.removeChild(textarea);
+            });
+            
+            // Aggiungi l'event listener per il pulsante di uscita dalla lobby
+            document.getElementById('leaveLobbyBtn').addEventListener('click', function() {
+                if (window.game && window.game.lobbyId) {
+                    fetch('lobby.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            type: 'leaveLobby',
+                            playerId: playerId,
+                            lobbyId: window.game.lobbyId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Reindirizza alla pagina principale
+                            window.location.href = 'index.html';
+                        } else {
+                            console.error('Errore durante l\'uscita dalla lobby:', data.error);
+                            alert('Errore durante l\'uscita dalla lobby: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Errore durante l\'uscita dalla lobby:', error);
+                        alert('Errore durante l\'uscita dalla lobby');
+                    });
+                }
+            });
+        };
+        document.head.appendChild(multiplayerScript);
+    </script>
+</body>
+</html> 
